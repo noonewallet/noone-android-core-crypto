@@ -1,3 +1,4 @@
+![Noone core](https://github.com/noonewallet/noone-android-core-crypto/assets/111989613/c41f6424-8a07-4625-95af-7b128cda5d3e)
 [![License](https://img.shields.io/badge/license-MIT-black.svg?style=flat)](https://mit-license.org)
 [![Platform](https://img.shields.io/badge/platform-android-blue)](https://developer.apple.com/resources/)
 [![Swift](https://img.shields.io/badge/kotlin-1.6.10-brightgreen.svg)](https://developer.apple.com/resources/)
