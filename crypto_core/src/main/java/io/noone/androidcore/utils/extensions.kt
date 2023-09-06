@@ -11,7 +11,7 @@ import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
-import java.util.*
+import java.util.Arrays
 
 val ByteArray.hex: String
     get() = HexUtils.toHex(this)
@@ -47,6 +47,14 @@ fun ByteArray.blake2b256(): ByteArray {
     digest.doFinal(hash, 0)
     return hash
 }
+
+val ByteArray.keccak256: ByteArray
+    get() {
+        return with(Keccak.Digest256()) {
+            update(this@keccak256)
+            digest()
+        }
+    }
 
 inline fun <T> Iterable<T>.sumByLong(selector: (T) -> Long): Long {
     var sum: Long = 0
