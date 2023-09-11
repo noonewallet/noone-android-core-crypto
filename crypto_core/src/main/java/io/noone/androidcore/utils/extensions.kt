@@ -233,3 +233,12 @@ fun ByteArray.startsWith(startsWith: ByteArray): Boolean {
     }
     return true
 }
+
+fun BigInteger.toBytes(numBytes: Int): ByteArray {
+    val bytes = ByteArray(numBytes)
+    val biBytes = this.toByteArray()
+    val start = if (biBytes.size == numBytes + 1) 1 else 0
+    val length = biBytes.size.coerceAtMost(numBytes)
+    System.arraycopy(biBytes, start, bytes, numBytes - length, length)
+    return bytes
+}
