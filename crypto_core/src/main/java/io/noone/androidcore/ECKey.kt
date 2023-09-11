@@ -5,11 +5,13 @@ import io.noone.androidcore.utils.currentTimeSeconds
 import io.noone.androidcore.utils.hex
 import io.noone.androidcore.utils.sha256hash160
 import io.noone.androidcore.utils.toByteArrayUnsigned
+import io.noone.androidcore.utils.toBytes
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x9.X9ECParameters
+import org.bouncycastle.asn1.x9.X9IntegerConverter
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.ec.CustomNamedCurves
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator
@@ -19,6 +21,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters
 import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import org.bouncycastle.crypto.signers.ECDSASigner
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
+import org.bouncycastle.math.ec.ECAlgorithms
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.math.ec.FixedPointUtil
@@ -65,6 +68,13 @@ open class ECKey {
             return /*if (point.isCompressed) */point //else LazyECPoint(compressPoint(point.get()))
         }
 
+        private fun decompressKey(xBN: BigInteger, yBit: Boolean): ECPoint {
+            val x9 = X9IntegerConverter()
+            val compEnc = x9.integerToBytes(xBN, 1 + x9.getByteLength(CURVE.curve))
+            compEnc[0] = (if (yBit) 0x03 else 0x02).toByte()
+            return CURVE.curve.decodePoint(compEnc)
+        }
+
         private fun getPointWithCompression(point: ECPoint, compressed: Boolean): ECPoint {
             var point = point
             /*if (point.isCompressed == compressed)
@@ -96,6 +106,37 @@ open class ECKey {
                 localPrivKey = localPrivKey.mod(CURVE.n)
             }
             return FixedPointCombMultiplier().multiply(CURVE.g, localPrivKey)
+        }
+
+        fun recoverPubBytesFromSignature(
+            recId: Int, sig: ECDSASignature, messageHash: ByteArray
+        ): ByteArray? {
+            check(recId >= 0) { "recId must be positive" }
+            check(sig.r.signum() >= 0) { "r must be positive" }
+            check(sig.s.signum() >= 0) { "s must be positive" }
+            val n = CURVE.n // Curve order.
+            val i = BigInteger.valueOf(recId.toLong() / 2)
+            val x = sig.r.add(i.multiply(n))
+
+            // TODO!
+            /*val curve = CURVE.curve as ECCurve.Fp
+            val prime = curve.q
+            if (x >= prime) {
+                throw IllegalStateException()
+            }*/
+
+            val R: ECPoint = decompressKey(x, recId and 1 == 1)
+            if (!R.multiply(n).isInfinity) {
+                return null
+            }
+
+            val e = BigInteger(1, messageHash)
+            val eInv = BigInteger.ZERO.subtract(e).mod(n)
+            val rInv = sig.r.modInverse(n)
+            val srInv = rInv.multiply(sig.s).mod(n)
+            val eInvrInv = rInv.multiply(eInv).mod(n)
+            val q = ECAlgorithms.sumOfTwoMultiplies(CURVE.g, eInvrInv, R, srInv)
+            return q.getEncoded( /* compressed */false)
         }
 
         /**
@@ -197,6 +238,13 @@ open class ECKey {
      */
     class ECDSASignature(val r: BigInteger, val s: BigInteger) {
 
+        var v: Byte = 0
+
+        fun toByteArray(): ByteArray {
+            val fixedV = if (this.v >= 27) { (this.v - 27) } else this.v
+            return this.r.toBytes(32) + s.toBytes(32) + byteArrayOf(fixedV.toByte())
+        }
+
         /**
          * Will automatically adjust the S component to be less than or equal to half the curve order, if necessary.
          * This is required because for every signature (r,s) the signature (r, -s (mod N)) is a valid signature of
@@ -291,6 +339,24 @@ open class ECKey {
         signer.init(true, privKey)
         val components = signer.generateSignature(input)
         return ECDSASignature(components[0], components[1]).toCanonicalised()
+    }
+
+    fun signWithV(messageHash: ByteArray): ECDSASignature {
+        val sig: ECDSASignature = sign(messageHash)
+        var recId = -1
+        val thisKey: ByteArray = this.pub.getEncoded( /* compressed */false)
+        for (i in 0..3) {
+            val k: ByteArray? = recoverPubBytesFromSignature(i, sig, messageHash)
+            if (k != null && k.contentEquals(thisKey)) {
+                recId = i
+                break
+            }
+        }
+        if (recId == -1) {
+            throw RuntimeException("Could not construct a recoverable key. This should never happen.")
+        }
+        sig.v = (recId + 27).toByte()
+        return sig
     }
 
     override fun equals(other: Any?): Boolean {
