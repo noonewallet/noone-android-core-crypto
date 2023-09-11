@@ -118,12 +118,11 @@ open class ECKey {
             val i = BigInteger.valueOf(recId.toLong() / 2)
             val x = sig.r.add(i.multiply(n))
 
-            // TODO!
-            /*val curve = CURVE.curve as ECCurve.Fp
-            val prime = curve.q
+            val curve = CURVE.curve
+            val prime = curve.field.characteristic
             if (x >= prime) {
-                throw IllegalStateException()
-            }*/
+                return null
+            }
 
             val R: ECPoint = decompressKey(x, recId and 1 == 1)
             if (!R.multiply(n).isInfinity) {
