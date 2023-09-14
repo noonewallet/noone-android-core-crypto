@@ -195,6 +195,8 @@ fun Int.toBytesBE(): ByteArray = ByteBufferUtils.bigEndian(4).putInt(this).array
 
 fun Long.toBytesLE(): ByteArray = ByteBufferUtils.littleEndian(8).putLong(this).array()
 
+fun Long.toBytesBE(): ByteArray = ByteBufferUtils.bigEndian(8).putLong(this).array()
+
 fun ByteArray.toBytesLE(): ByteArray = ByteBufferUtils.littleEndian(size).put(this).array()
 
 fun ByteArray.trimLeadingBytes(b: Byte): ByteArray {
