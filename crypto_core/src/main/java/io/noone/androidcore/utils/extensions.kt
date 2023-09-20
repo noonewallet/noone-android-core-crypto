@@ -13,6 +13,10 @@ import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.Arrays
 
+const val HEX_PREFIX = "0x"
+val ByteArray.hexWithPrefix: String
+    get() = HEX_PREFIX + HexUtils.toHex(this)
+
 val ByteArray.hex: String
     get() = HexUtils.toHex(this)
 
