@@ -19,7 +19,7 @@ This library is an implementation of tools related to cryptography. Included:
  __Hash:__ 
  [Sha, RipeMD160, Keccak256, Blake2b](https://github.com/noonewallet/noone-android-core-crypto/blob/master/crypto_core/src/main/java/io/noone/androidcore/utils/extensions.kt)
 
- __Derivalion:__
+ __Derivation:__
 [Mnemonic](https://github.com/noonewallet/noone-android-core-crypto/blob/master/crypto_core/src/main/java/io/noone/androidcore/hd/MnemonicCode.kt)
 | [Keys derivation](https://github.com/noonewallet/noone-android-core-crypto/blob/master/crypto_core/src/main/java/io/noone/androidcore/hd/DeterministicKey.kt)
  
@@ -77,6 +77,68 @@ val btcInChainKey = DeterministicSeed(entropy).getKeyFromSeed(btcChainPath)
 val signature = btcInChainKey.sign(message).encodeToDER().hex
 println(signature)
 ```
+
+
+## Testing mnemonics generation for a test NIST SP 800-22
+
+To verify the security of entropy generation, we will test the [SecureRandom](https://developer.android.com/reference/java/security/SecureRandom) library.
+The verification test was sourced from the official NIST website at [csrc.nist.gov](https://csrc.nist.gov/projects/random-bit-generation/documentation-and-software).
+
+How to build
+------------
+- Clone this repository. Then build `app-nist` module and run it on the test device
+```console
+git clone git@github.com:noonewallet/noone-android-core-crypto.git
+```
+- Download and unpack testing software from the NIST website [csrc.nist.gov](https://csrc.nist.gov/projects/random-bit-generation/documentation-and-software).
+- Go to the `nist` folder
+- Compile testing software. Run in console:
+```console
+$ ./make -f makefile
+```
+
+How to testing
+------------
+- In the app enter the file length and click generate. Recommended length no less than 1,507,328
+- Copy the generated file to the `nist` folder.
+- Calculate file length in bits devided by the number of byte streams: `bitsLength = fileLength * 8 / 10` (for example bit length can be 1200000)
+
+Run test:
+```console
+$ ./assess 1200000
+```
+
+Choose the test method ([0] Input File):
+```console
+$ Enter Choice: 0
+```
+
+Enter the path to the file:
+```console
+$ User Prescribed Input File: ../bytes.pi
+```
+
+Choose the type of test ([01] Frequency):
+```console
+$ Enter Choice: 1
+```
+
+Enter the test parameters:
+```console
+$ Select Test (0 to continue): 0
+$ How many bitstreams? 10
+```
+
+Choose a file type. In our case, this is Binary ([1] Binary - Each byte in data file contains 8 bits of data):
+```console
+$ Select input mode: 1
+```
+
+The test will conclude when the message 'Statistical Testing Complete!' appears in the terminal.
+
+After that, the 'finalAnalysisReport.txt' containing the test results will be opened.
+The results are written to the file `../nist/sts-*/experiments/AlgorithmTesting/finalAnalysisReport.txt`
+
 
 
 ## Created using
