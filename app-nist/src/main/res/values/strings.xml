@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">app-nist</string>
+    <string name="fragment_generate_length">Length</string>
+    <string name="fragment_generate_enter_length_hint">Enter length in bytes</string>
+    <string name="fragment_generate_generate">Generate</string>
+    <string name="default_error_message">error</string>
+</resources>
