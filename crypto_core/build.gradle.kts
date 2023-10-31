@@ -32,6 +32,6 @@ android {
 }
 
 dependencies {
-    implementation("org.bouncycastle:bcprov-jdk15on:1.68")
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     testImplementation("junit:junit:4.13.2")
 }
