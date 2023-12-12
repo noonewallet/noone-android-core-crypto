@@ -4,12 +4,9 @@ import io.noone.androidcore.ECKey
 import io.noone.androidcore.LazyECPoint
 import io.noone.androidcore.exceptions.HDDerivationException
 import io.noone.androidcore.utils.hex
-import io.noone.androidcore.utils.hmacSHA512
 import io.noone.androidcore.utils.sha256hash160
-import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.nio.ByteBuffer
-import java.security.SecureRandom
 import java.util.*
 
 class DeterministicKey : ECKey {
@@ -25,98 +22,6 @@ class DeterministicKey : ECKey {
             parent: DeterministicKey,
             childNumber: Int
         ): DeterministicKey = parent.deriveChildKey(ChildNumber(childNumber))
-
-        // Some arbitrary random number. Doesn't matter what it is.
-        private val RAND_INT: BigInteger = BigInteger(256, SecureRandom())
-
-        @Throws(HDDerivationException::class)
-        fun deriveChildKeyBytesFromPrivate(
-            parent: DeterministicKey,
-            childNumber: ChildNumber
-        ): RawKeyBytes {
-            require(parent.hasPrivKey()) {
-                "Parent key must have private key bytes for this method."
-            }
-            val parentPublicKey = parent.pubKeyPoint.getEncoded(true)
-            require(parentPublicKey.size == 33) {
-                "Parent pubkey must be 33 bytes, but is " + parentPublicKey.size
-            }
-            val data = ByteBuffer.allocate(37)
-            if (childNumber.isHardened) {
-                data.put(parent.privKeyBytes33)
-            } else {
-                data.put(parentPublicKey)
-            }
-            data.putInt(childNumber.i)
-            val i = data.array()
-                .hmacSHA512(parent.chainCode)// HDUtils.hmacSha512(parent.chainCode, data.array())
-            require(i.size == 64) {
-                i.size.toString()
-            }
-            val il = i.copyOfRange(0, 32)
-            val chainCode = i.copyOfRange(32, 64)
-            val ilInt = BigInteger(1, il)
-            assertLessThanN(ilInt, "Illegal derived key: I_L >= n")
-            val priv = parent.privKey
-            val ki = priv.add(ilInt).mod(CURVE.n)
-            assertNonZero(ki, "Illegal derived key: derived private key equals 0.")
-            return RawKeyBytes(ki.toByteArray(), chainCode)
-        }
-
-        @Throws(HDDerivationException::class)
-        fun deriveChildKeyBytesFromPublic(
-            parent: DeterministicKey,
-            childNumber: ChildNumber,
-            mode: PublicDeriveMode
-        ): RawKeyBytes {
-            require(!childNumber.isHardened) {
-                "Can't use private derivation with public keys only."
-            }
-            val parentPublicKey = parent.pubKeyPoint.getEncoded(true)
-            require(parentPublicKey.size == 33) {
-                "Parent pubkey must be 33 bytes, but is " + parentPublicKey.size
-            }
-            val data = ByteBuffer.allocate(37)
-            data.put(parentPublicKey)
-            data.putInt(childNumber.i)
-            val i = data.array().hmacSHA512(parent.chainCode)
-            require(i.size == 64) { i.size }
-            val il = i.copyOfRange(0, 32)
-            val chainCode = i.copyOfRange(32, 64)
-            val ilInt = BigInteger(1, il)
-            assertLessThanN(ilInt, "Illegal derived key: I_L >= n")
-
-            val N = CURVE.n
-            var Ki: ECPoint
-            when (mode) {
-                PublicDeriveMode.NORMAL -> Ki =
-                    publicPointFromPrivate(ilInt).add(parent.pubKeyPoint)
-                PublicDeriveMode.WITH_INVERSION -> {
-                    Ki = publicPointFromPrivate(ilInt.add(RAND_INT).mod(N))
-                    val additiveInverse = RAND_INT.negate().mod(N)
-                    Ki = Ki.add(publicPointFromPrivate(additiveInverse))
-                    Ki = Ki.add(parent.pubKeyPoint)
-                }
-            }
-
-            assertNonInfinity(Ki, "Illegal derived key: derived public key equals infinity.")
-            return RawKeyBytes(Ki.getEncoded(true), chainCode)
-        }
-
-        private fun assertNonZero(integer: BigInteger, errorMessage: String) {
-            if (integer == BigInteger.ZERO)
-                throw HDDerivationException(errorMessage)
-        }
-
-        private fun assertNonInfinity(point: ECPoint, errorMessage: String) {
-            if (point.equals(CURVE.curve.infinity))
-                throw HDDerivationException(errorMessage)
-        }
-
-        private fun assertLessThanN(integer: BigInteger, errorMessage: String) {
-            if (integer > CURVE.n)
-                throw HDDerivationException(errorMessage)
-        }
     }
 
     private var parent: DeterministicKey? = null
@@ -168,12 +73,12 @@ class DeterministicKey : ECKey {
         parent: DeterministicKey?
     ) : super(
         priv,
-        compressPoint(checkNotNull<LazyECPoint>(publicAsPoint))
+        compressPoint(publicAsPoint)
     ) {
         require(chainCode.size == 32)
         this.parent = parent
-        this.path = checkNotNull(childNumberPath)
-        this.chainCode = Arrays.copyOf(chainCode, chainCode.size)
+        this.path = childNumberPath
+        this.chainCode = chainCode.copyOf(chainCode.size)
         this.depth = if (parent == null) 0 else parent.depth + 1
         this.parentFingerprint = parent?.fingerprint ?: 0
     }
@@ -298,7 +203,7 @@ class DeterministicKey : ECKey {
     @Throws(HDDerivationException::class)
     fun deriveChildKey(childNumber: ChildNumber): DeterministicKey {
         return if (this.hasPrivKey()) {
-            val rawKey = deriveChildKeyBytesFromPrivate(this, childNumber)
+            val rawKey = this.deriveChildKeyBytesFromPrivate(childNumber)
             DeterministicKey(
                 this.path + childNumber,
                 rawKey.chainCode,
@@ -306,11 +211,7 @@ class DeterministicKey : ECKey {
                 this
             )
         } else {
-            val rawKey = deriveChildKeyBytesFromPublic(
-                this,
-                childNumber,
-                PublicDeriveMode.NORMAL
-            )
+            val rawKey = this.deriveChildKeyBytesFromPublic(childNumber, PublicDeriveMode.NORMAL)
             DeterministicKey(
                 this.path + childNumber,
                 rawKey.chainCode,
