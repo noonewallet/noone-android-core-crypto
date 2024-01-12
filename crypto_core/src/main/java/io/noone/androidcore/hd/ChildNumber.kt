@@ -1,7 +1,8 @@
 package io.noone.androidcore.hd
 
 
-import java.util.*
+import io.noone.androidcore.utils.toBytesBE
+import java.util.Locale
 
 class ChildNumber : Comparable<ChildNumber> {
 
@@ -19,6 +20,14 @@ class ChildNumber : Comparable<ChildNumber> {
             return a and HARDENED_BIT != 0
         }
     }
+
+    val sequence: ByteArray
+        get() = if (isHardened) {
+            i or HARDENED_BIT
+        } else {
+            i
+        }
+            .toBytesBE()
 
     /** uint32 encoded form of the path element, including the most significant bit.  */
     val i: Int

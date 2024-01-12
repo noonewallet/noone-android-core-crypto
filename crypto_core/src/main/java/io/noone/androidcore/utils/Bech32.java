@@ -111,11 +111,19 @@ public class Bech32 {
     }
 
     /** Decode a Bech32 string. */
-    public static Bech32Data decode(final String str) throws AddressFormatException {
+    public static Bech32Data decode(final String str) {
+        return decode(str, false);
+    }
+
+    /** Decode a Bech32 string. */
+    public static Bech32Data decode(
+            final String str,
+            final boolean allowLongStrings
+    ) throws AddressFormatException {
         boolean lower = false, upper = false;
         if (str.length() < 8)
             throw new AddressFormatException.InvalidDataLength("Input too short: " + str.length());
-        if (str.length() > 90)
+        if (str.length() > 90 && !allowLongStrings)
             throw new AddressFormatException.InvalidDataLength("Input too long: " + str.length());
         for (int i = 0; i < str.length(); ++i) {
             char c = str.charAt(i);

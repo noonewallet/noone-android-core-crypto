@@ -3,8 +3,12 @@ package io.noone.androidcore.hd
 import io.noone.androidcore.ECKey
 import io.noone.androidcore.LazyECPoint
 import io.noone.androidcore.exceptions.HDDerivationException
+import io.noone.androidcore.utils.Base58
 import io.noone.androidcore.utils.hex
 import io.noone.androidcore.utils.sha256hash160
+import io.noone.androidcore.utils.sha256sha256
+import io.noone.androidcore.utils.toBytesBE
+import io.noone.androidcore.utils.toBytesLE
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.util.*
@@ -12,6 +16,9 @@ import java.util.*
 class DeterministicKey : ECKey {
 
     companion object {
+
+        val xpubPrefix = 0x0488b21e.toBytesBE()
+        val xprvPrefix = 0x0488ade4.toBytesBE()
 
         /** Convert to a string path, starting with "M/"  */
         fun formatPath(path: List<ChildNumber>): String {
@@ -23,6 +30,9 @@ class DeterministicKey : ECKey {
             childNumber: Int
         ): DeterministicKey = parent.deriveChildKey(ChildNumber(childNumber))
     }
+
+    val sequence: ByteArray
+        get() = this.path.last().sequence
 
     private var parent: DeterministicKey? = null
 
@@ -227,5 +237,75 @@ class DeterministicKey : ECKey {
         hardened: Boolean = false
     ): DeterministicKey = deriveChildKey(ChildNumber(i, hardened))
 
+    val xpub: String
+        get() {
+
+            val data = ByteArray(78)
+            var cursor = 0
+            xpubPrefix.copyInto(data)
+            cursor += xpubPrefix.size
+
+            data[4] = depth.toByte()
+            cursor += 1
+
+            parentFingerprint.toBytesBE().let {
+                it.copyInto(data, cursor)
+                cursor += it.size
+            }
+
+            this.sequence.toBytesLE().let {
+                it.copyInto(data, cursor)
+                cursor += it.size
+            }
+
+            chainCode.copyInto(data, cursor)
+            cursor += chainCode.size
+
+            pubKey.copyInto(data, cursor)
+            cursor += pubKey.size
+
+            val checksum = data.sha256sha256
+            val output = ByteArray(data.size + 4)
+
+            data.copyInto(output)
+            checksum.copyInto(output, data.size, 0, 4)
+
+            return Base58.encode(output)
+        }
+
+    val xprv: String
+        get() {
+            val data = ByteArray(78)
+            var cursor = 0
+            xprvPrefix.copyInto(data)
+            cursor += xprvPrefix.size
+
+            data[4] = depth.toByte()
+            cursor += 1
+
+            parentFingerprint.toBytesBE().let {
+                it.copyInto(data, cursor)
+                cursor += it.size
+            }
+
+            this.sequence.toBytesLE().let {
+                it.copyInto(data, cursor)
+                cursor += it.size
+            }
+
+            chainCode.copyInto(data, cursor)
+            cursor += chainCode.size
+
+            privKeyBytes33.copyInto(data, cursor)
+            cursor += privKeyBytes33.size
+
+            val checksum = data.sha256sha256
+            val output = ByteArray(data.size + 4)
+
+            data.copyInto(output)
+            checksum.copyInto(output, data.size, 0, 4)
+
+            return Base58.encode(output)
+        }
 
 }
