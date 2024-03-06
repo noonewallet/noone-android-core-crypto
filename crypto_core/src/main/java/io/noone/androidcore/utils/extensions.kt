@@ -125,6 +125,16 @@ val ByteArray.sha256: ByteArray
     }
 
 /**
+ * Calculates SHA512(input).
+ */
+val ByteArray.sha512: ByteArray
+    get() {
+        val digest = MessageDigest.getInstance("SHA-512")
+        digest.update(this, 0, this.size)
+        return digest.digest()
+    }
+
+/**
  * Calculates SHA256(input).
  */
 val ByteArray.sha256sha256: ByteArray
