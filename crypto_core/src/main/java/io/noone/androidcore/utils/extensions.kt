@@ -101,6 +101,20 @@ fun ByteArray.hmacSHA512(key: ByteArray): ByteArray {
     return out
 }
 
+val ByteArray.firstHalf: ByteArray
+    get() {
+        val half = ByteArray(this.size / 2)
+        System.arraycopy(this, 0, half, 0, half.size)
+        return half
+    }
+
+val ByteArray.lashHalf: ByteArray
+    get() {
+        val half = ByteArray(this.size / 2)
+        System.arraycopy(this, this.size / 2, half, 0, half.size)
+        return half
+    }
+
 /**
  * Calculates RIPEMD160(SHA256(input)).
  */
