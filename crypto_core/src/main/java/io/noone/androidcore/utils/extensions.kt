@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jcajce.provider.digest.Keccak
+import org.bouncycastle.util.encoders.Base64
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
@@ -16,6 +17,12 @@ import java.util.Arrays
 const val HEX_PREFIX = "0x"
 val ByteArray.hexWithPrefix: String
     get() = HEX_PREFIX + HexUtils.toHex(this)
+
+val ByteArray.base64: String
+    get() = Base64.toBase64String(this)
+
+val String.base64: ByteArray
+    get() = Base64.decode(this)
 
 val ByteArray.hex: String
     get() = HexUtils.toHex(this)
