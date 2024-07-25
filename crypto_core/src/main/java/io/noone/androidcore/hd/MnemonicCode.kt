@@ -157,7 +157,7 @@ class MnemonicCode @JvmOverloads constructor(
         fun toSeed(words: List<String>, passphrase: String): ByteArray {
             val pass = words.joinToString(separator = " ") { it }
             val salt = "mnemonic$passphrase"
-            return PBKDF2SHA512.derive(pass, salt, PBKDF2_ROUNDS, 64)
+            return PBKDF2SHA512.derive(pass.toByteArray(), salt, PBKDF2_ROUNDS, 64)
         }
 
         private fun bytesToBits(data: ByteArray): BooleanArray {

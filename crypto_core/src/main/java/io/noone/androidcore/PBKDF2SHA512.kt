@@ -19,7 +19,7 @@ import kotlin.math.pow
 object PBKDF2SHA512 {
 
     fun derive(
-        password: String,
+        password: ByteArray,
         salt: String,
         cycles: Int,
         keyLen: Int
@@ -43,14 +43,14 @@ object PBKDF2SHA512 {
     @Suppress("FunctionName")
     @Throws(Exception::class)
     private fun F(
-        P: String,
+        P: ByteArray,
         S: String,
         c: Int,
         i: Int
     ): ByteArray? {
         var uLast: ByteArray? = null
         var uXor: ByteArray? = null
-        val key = SecretKeySpec(P.toByteArray(StandardCharsets.UTF_8), "HmacSHA512")
+        val key = SecretKeySpec(P, "HmacSHA512")
         val mac = Mac.getInstance(key.algorithm)
         mac.init(key)
         for (j in 0 until c) {
