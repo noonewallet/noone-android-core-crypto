@@ -1,2 +1,3 @@
 before_script:
+  - echo "Jitpack.yml detected"
   - yes | sdkmanager "cmake;3.10.2"
