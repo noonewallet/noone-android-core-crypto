@@ -1,3 +1,5 @@
 before_script:
+  - sdk install java 11.0.10-open
+  - sdk use java 11.0.10-open
   - echo "Jitpack.yml detected"
   - yes | sdkmanager "cmake;3.10.2"
