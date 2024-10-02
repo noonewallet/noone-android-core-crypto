@@ -1,13 +1,2 @@
-install:
-  - sudo apt-get update -y
-  - sudo apt-get install -y cmake ninja-build
-
 before_script:
-  - export ANDROID_HOME=$HOME/android-sdk
-  - mkdir -p $ANDROID_HOME
-  - yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
-  - sdkmanager --sdk_root=$ANDROID_HOME "cmake;3.10.2" "ndk-bundle"
-
-script:
-  - ./gradlew clean build
-
+  - yes | sdkmanager "cmake;3.10.2.4988404"
