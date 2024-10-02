@@ -1,8 +1,8 @@
 package io.noone.androidcore.bnb
 
-import io.noone.adnrodicore.crypto.hd.ChildNumber
-import io.noone.adnrodicore.crypto.hd.DeterministicSeed
-import io.noone.adnrodicore.crypto.utils.hex
+import io.noone.androidcore.hd.ChildNumber
+import io.noone.androidcore.hd.DeterministicSeed
+import io.noone.androidcore.utils.hex
 import org.junit.Assert
 import org.junit.Test
 
