@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("maven-publish")
 }
 
 android {
@@ -49,4 +50,25 @@ dependencies {
     implementation("com.upokecenter:cbor:4.4.4")
     implementation(project(":crypto_core"))
     testImplementation("junit:junit:4.13.2")
+}
+
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "io.noone.androidcore"
+            artifactId = "crypto_cardano"
+            version = "2.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "local_repo"
+            url = uri(layout.buildDirectory.dir("repo"))
+        }
+    }
 }

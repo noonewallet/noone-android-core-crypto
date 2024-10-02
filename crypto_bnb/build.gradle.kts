@@ -7,6 +7,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("maven-publish")
     id("com.google.protobuf") version "0.8.19"
 }
 
@@ -74,4 +75,24 @@ fun com.android.build.api.dsl.AndroidSourceSet.proto(action: SourceDirectorySet.
         ?.getByName("proto")
         ?.let { it as? SourceDirectorySet }
         ?.apply(action)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "io.noone.androidcore"
+            artifactId = "crypto_bnb"
+            version = "2.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "local_repo"
+            url = uri(layout.buildDirectory.dir("repo"))
+        }
+    }
 }
