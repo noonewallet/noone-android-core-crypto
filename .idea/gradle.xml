@@ -4,16 +4,20 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="testRunner" value="GRADLE" />
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="11" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app-nist" />
+            <option value="$PROJECT_DIR$/crypto_bnb" />
+            <option value="$PROJECT_DIR$/crypto_btc_like" />
+            <option value="$PROJECT_DIR$/crypto_cardano" />
             <option value="$PROJECT_DIR$/crypto_core" />
+            <option value="$PROJECT_DIR$/crypto_tron" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

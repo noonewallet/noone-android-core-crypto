@@ -49,7 +49,7 @@ kapt {
 protobuf {
 
     protobuf.protoc {
-        artifact = "com.google.protobuf:protoc:3.21.7"
+        artifact = "com.google.protobuf:protoc:3.22.3"
     }
     protobuf.generateProtoTasks {
         all().forEach {
@@ -63,8 +63,8 @@ protobuf {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
-    implementation("com.google.code.gson:gson:2.9.0")
-    implementation("com.google.protobuf:protobuf-java:3.21.7")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.protobuf:protobuf-java:3.22.3")
     implementation(project(":crypto_core"))
 }
 

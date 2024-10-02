@@ -29,6 +29,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    namespace = "io.noone.androidcore.crypto"
 }
 
 dependencies {

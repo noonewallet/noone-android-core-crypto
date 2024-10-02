@@ -15,3 +15,7 @@ dependencyResolutionManagement {
 rootProject.name = "android-core-crypto"
 include ':crypto_core'
 include ':app-nist'
+include ':crypto_btc_like'
+include ':crypto_cardano'
+include ':crypto_tron'
+include ':crypto_bnb'
