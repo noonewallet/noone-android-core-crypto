@@ -14,6 +14,7 @@ android {
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {
+                version = "3.10.2"
                 cppFlags("")
             }
         }
