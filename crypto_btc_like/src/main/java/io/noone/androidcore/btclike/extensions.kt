@@ -1,5 +1,7 @@
 package io.noone.androidcore.btclike
 
+import io.noone.androidcore.btclike.networks.ExtendedPrivateKeyType
+import io.noone.androidcore.btclike.networks.ExtendedPublicKeyType
 import io.noone.androidcore.btclike.networks.NetworkParameters
 import io.noone.androidcore.hd.DeterministicKey
 import io.noone.androidcore.utils.Base58
@@ -7,11 +9,21 @@ import io.noone.androidcore.utils.sha256sha256
 import io.noone.androidcore.utils.toBytesBE
 import io.noone.androidcore.utils.toBytesLE
 
-fun DeterministicKey.getExtendedPublicKey(netParams: NetworkParameters): String {
+fun DeterministicKey.getExtendedPublicKey(
+    netParams: NetworkParameters,
+    keyType: ExtendedPublicKeyType,
+): String {
     val data = ByteArray(78)
     var cursor = 0
-    netParams.slip32PubKeyPrefix.copyInto(data)
-    cursor += netParams.slip32PubKeyPrefix.size
+
+    when (keyType) {
+        ExtendedPublicKeyType.XPUB -> netParams.slip32PubKeyPrefixXpub
+        ExtendedPublicKeyType.YPUB -> netParams.slip32PubKeyPrefixYpub
+        ExtendedPublicKeyType.ZPUB -> netParams.slip32PubKeyPrefixZpub
+    }.let {
+        it.copyInto(data)
+        cursor += it.size
+    }
 
     data[4] = depth.toByte()
     cursor += 1
@@ -41,11 +53,21 @@ fun DeterministicKey.getExtendedPublicKey(netParams: NetworkParameters): String 
     return Base58.encode(output)
 }
 
-fun DeterministicKey.getExtendedPrivateKey(netParams: NetworkParameters): String {
+fun DeterministicKey.getExtendedPrivateKey(
+    netParams: NetworkParameters,
+    keyType: ExtendedPrivateKeyType
+): String {
     val data = ByteArray(78)
     var cursor = 0
-    netParams.slip32PrivKeyPrefix.copyInto(data)
-    cursor += netParams.slip32PrivKeyPrefix.size
+
+    when (keyType) {
+        ExtendedPrivateKeyType.XPRV -> netParams.slip32PrivKeyPrefixXprv
+        ExtendedPrivateKeyType.YPRV -> netParams.slip32PrivKeyPrefixYprv
+        ExtendedPrivateKeyType.ZPRV -> netParams.slip32PrivKeyPrefixZprv
+    }.let {
+        it.copyInto(data)
+        cursor += it.size
+    }
 
     data[4] = depth.toByte()
     cursor += 1
