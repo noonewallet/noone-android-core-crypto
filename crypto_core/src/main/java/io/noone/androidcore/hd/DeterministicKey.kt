@@ -163,10 +163,10 @@ class DeterministicKey : ECKey {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
-        val other = other as DeterministicKey?
-        return (super.equals(other)
-                && this.chainCode.contentEquals(other.chainCode)
-                && this.path == other.path)
+        val otherCast = (other as? DeterministicKey) ?: return false
+        return (super.equals(otherCast)
+                && this.chainCode.contentEquals(otherCast.chainCode)
+                && this.path == otherCast.path)
     }
 
     override fun hashCode(): Int {

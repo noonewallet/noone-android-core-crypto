@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     implementation(project(":crypto_core"))
     implementation("androidx.core:core-ktx:1.13.1")
 

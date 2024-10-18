@@ -51,7 +51,7 @@ class LegacyAddress @Throws(AddressFormatException::class) private constructor(
             return true
         if (o == null || javaClass != o.javaClass)
             return false
-        val other = o as LegacyAddress?
+        val other = (o as? LegacyAddress) ?: return false
         return super.equals(other) && this.p2sh == other.p2sh
     }
 

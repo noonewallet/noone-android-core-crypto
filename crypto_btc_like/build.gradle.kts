@@ -35,7 +35,7 @@ android {
 
 dependencies {
     implementation(project("path" to ":crypto_core"))
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     testImplementation("junit:junit:4.13.2")
 }
 

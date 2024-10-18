@@ -1,14 +1,12 @@
-import com.google.protobuf.gradle.builtins
-import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.protoc
+
 
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("maven-publish")
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 android {
@@ -48,14 +46,15 @@ kapt {
 }
 
 protobuf {
-
-    protobuf.protoc {
-        artifact = "com.google.protobuf:protoc:3.22.3"
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.5"
     }
-    protobuf.generateProtoTasks {
-        all().forEach {
-            it.builtins {
-                id("java") { option("lite") }
+    generateProtoTasks {
+        all().configureEach {
+            builtins {
+                id("java") {
+                    option("lite")
+                }
             }
         }
     }
@@ -70,11 +69,7 @@ dependencies {
 }
 
 fun com.android.build.api.dsl.AndroidSourceSet.proto(action: SourceDirectorySet.() -> Unit) {
-    (this as? ExtensionAware)
-        ?.extensions
-        ?.getByName("proto")
-        ?.let { it as? SourceDirectorySet }
-        ?.apply(action)
+    (this as ExtensionAware).extensions.configure("proto", action)
 }
 
 publishing {
