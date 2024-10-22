@@ -38,6 +38,11 @@ class Test {
         return ECKey.fromPrivate(privKey)
     }
 
+    private fun getUncompressedECKey(): ECKey {
+        val privKey = "3180aaa8770d3fb796565e6ef657a58374ee066c0da28ee4c2e2d9efa29fb7f1".hex
+        return ECKey.fromPrivate(privKey, false)
+    }
+
     @Test
     fun testMnemonicToSeed() {
         val expectedSeed = "abed1ce3f13984cf92ad0120119b94892c0e6ee2c4c00769d69c3808b97c513cb24783ecbb0055c4832ed07cddde1a75c61fd5769b63f63f70b70db9e9f89747"
@@ -119,10 +124,14 @@ class Test {
 
     @Test
     fun test_ECKey_publicKeyAsHex() {
-        val expectedPublicKey = "0382df5fed2938ebe1bcc6b3760b4605242d5f61682a4143bb5049d1b67b6e33c0"
+        val expectedCompressedPublicKey = "0382df5fed2938ebe1bcc6b3760b4605242d5f61682a4143bb5049d1b67b6e33c0"
+        val expectedPublicKey = "0482df5fed2938ebe1bcc6b3760b4605242d5f61682a4143bb5049d1b67b6e33c0fc3155f4fbfaf9946b7996671553ed0148deab58d0578ef2781a7ab37989d79d"
         val ecKey = getECKey()
 
-        Assert.assertEquals(expectedPublicKey, ecKey.publicKeyAsHex)
+        Assert.assertEquals(expectedCompressedPublicKey, ecKey.publicKeyAsHex)
+
+        val compressedECKey = getUncompressedECKey()
+        Assert.assertEquals(expectedPublicKey, compressedECKey.publicKeyAsHex)
     }
 
     @Test

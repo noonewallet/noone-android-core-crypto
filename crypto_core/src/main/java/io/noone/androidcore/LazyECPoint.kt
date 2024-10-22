@@ -2,10 +2,9 @@ package io.noone.androidcore
 
 
 import org.bouncycastle.math.ec.ECCurve
-import org.bouncycastle.math.ec.ECFieldElement
 import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
-import java.util.*
+import java.util.Arrays
 
 /**
  * A wrapper around ECPoint that delays decoding of the point for as long as possible. This is useful because point
@@ -16,59 +15,25 @@ class LazyECPoint {
     private val curve: ECCurve?
     private val bits: ByteArray?
 
-    // This field is effectively final - once set it won't change again. However it can be set after
-    // construction.
     private var point: ECPoint? = null
-
-    // Delegated methods.
-
-    val detachedPoint: ECPoint
-        get() = get().detachedPoint
+    private var compressed: Boolean = false
 
     val encoded: ByteArray
         get() = if (bits != null)
             Arrays.copyOf(bits, bits.size)
         else
-            get().getEncoded(true)
-
-    val isInfinity: Boolean
-        get() = get().isInfinity
-
-    val yCoord: ECFieldElement
-        get() = get().yCoord
-
-    val zCoords: Array<ECFieldElement>
-        get() = get().zCoords
-
-    val isNormalized: Boolean
-        get() = get().isNormalized
+            get().getEncoded(compressed)
 
     val isCompressed: Boolean
         get() = if (bits != null)
             bits[0].toInt() == 2 || bits[0].toInt() == 3
         else {
             get()
-            true//get().isCompressed
+            compressed
         }
-
 
     val isValid: Boolean
         get() = get().isValid
-
-    val xCoord: ECFieldElement
-        get() = get().xCoord
-
-    val y: ECFieldElement
-        get() = this.normalize().yCoord
-
-    val affineYCoord: ECFieldElement
-        get() = get().affineYCoord
-
-    val affineXCoord: ECFieldElement
-        get() = get().affineXCoord
-
-    val x: ECFieldElement
-        get() = this.normalize().xCoord
 
     private val canonicalEncoding: ByteArray
         get() = getEncoded(true)
@@ -78,8 +43,9 @@ class LazyECPoint {
         this.bits = bits
     }
 
-    constructor(point: ECPoint) {
+    constructor(point: ECPoint, compressed: Boolean) {
         this.point = checkNotNull(point)
+        this.compressed = compressed
         this.curve = null
         this.bits = null
     }
@@ -90,40 +56,12 @@ class LazyECPoint {
         return point!!
     }
 
-    fun timesPow2(e: Int): ECPoint {
-        return get().timesPow2(e)
-    }
-
     fun multiply(k: BigInteger): ECPoint {
         return get().multiply(k)
     }
 
-    fun subtract(b: ECPoint): ECPoint {
-        return get().subtract(b)
-    }
-
-    fun scaleY(scale: ECFieldElement): ECPoint {
-        return get().scaleY(scale)
-    }
-
-    fun scaleX(scale: ECFieldElement): ECPoint {
-        return get().scaleX(scale)
-    }
-
     fun equals(other: ECPoint): Boolean {
         return get().equals(other)
-    }
-
-    fun negate(): ECPoint {
-        return get().negate()
-    }
-
-    fun threeTimes(): ECPoint {
-        return get().threeTimes()
-    }
-
-    fun getZCoord(index: Int): ECFieldElement {
-        return get().getZCoord(index)
     }
 
     fun getEncoded(compressed: Boolean): ByteArray {
@@ -135,22 +73,6 @@ class LazyECPoint {
 
     fun add(b: ECPoint): ECPoint {
         return get().add(b)
-    }
-
-    fun twicePlus(b: ECPoint): ECPoint {
-        return get().twicePlus(b)
-    }
-
-    fun getCurve(): ECCurve {
-        return get().curve
-    }
-
-    fun normalize(): ECPoint {
-        return get().normalize()
-    }
-
-    fun twice(): ECPoint {
-        return get().twice()
     }
 
     override fun equals(o: Any?): Boolean {

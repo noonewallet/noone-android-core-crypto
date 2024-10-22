@@ -1,7 +1,6 @@
 package io.noone.androidcore
 
 import io.noone.androidcore.exceptions.SignatureDecodeException
-import io.noone.androidcore.utils.currentTimeSeconds
 import io.noone.androidcore.utils.hex
 import io.noone.androidcore.utils.sha256hash160
 import io.noone.androidcore.utils.toByteArrayUnsigned
@@ -14,11 +13,8 @@ import org.bouncycastle.asn1.x9.X9ECParameters
 import org.bouncycastle.asn1.x9.X9IntegerConverter
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.ec.CustomNamedCurves
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECDomainParameters
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters
-import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import org.bouncycastle.crypto.signers.ECDSASigner
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
 import org.bouncycastle.math.ec.ECAlgorithms
@@ -65,7 +61,7 @@ open class ECKey {
         }
 
         fun compressPoint(point: LazyECPoint): LazyECPoint {
-            return /*if (point.isCompressed) */point //else LazyECPoint(compressPoint(point.get()))
+            return if (point.isCompressed) point else LazyECPoint(compressPoint(point.get()), true)
         }
 
         private fun decompressKey(xBN: BigInteger, yBit: Boolean): ECPoint {
@@ -77,8 +73,7 @@ open class ECKey {
 
         private fun getPointWithCompression(point: ECPoint, compressed: Boolean): ECPoint {
             var point = point
-            /*if (point.isCompressed == compressed)
-                return point*/
+            if (compressed) return point
             point = point.normalize()
             val x = point.affineXCoord.toBigInteger()
             val y = point.affineYCoord.toBigInteger()
@@ -88,7 +83,7 @@ open class ECKey {
         @JvmOverloads
         fun fromPrivate(privKey: BigInteger, compressed: Boolean = true): ECKey {
             val point = publicPointFromPrivate(privKey)
-            return ECKey(privKey, getPointWithCompression(point, compressed))
+            return ECKey(privKey, getPointWithCompression(point, compressed), compressed)
         }
 
         fun fromPrivate(privKeyBytes: ByteArray): ECKey {
@@ -197,24 +192,14 @@ open class ECKey {
     val publicKeyAsHex: String
         get() = pub.encoded.hex
 
-    @JvmOverloads
-    constructor(secureRandom: SecureRandom = SECURE_RANDOM) {
-        val generator = ECKeyPairGenerator()
-        val keygenParams = ECKeyGenerationParameters(CURVE, secureRandom)
-        generator.init(keygenParams)
-        val keypair = generator.generateKeyPair()
-        val privParams = keypair.private as ECPrivateKeyParameters
-        val pubParams = keypair.public as ECPublicKeyParameters
-        priv = privParams.d
-        pub = LazyECPoint(CURVE.curve, pubParams.q.getEncoded(true))
-        creationTimeSeconds = currentTimeSeconds
-    }
-
-    protected constructor(priv: BigInteger?, pub: ECPoint) : this(
+    protected constructor(
+        priv: BigInteger?,
+        pub: ECPoint,
+        compressed: Boolean = true
+    ) : this(
         priv,
-        LazyECPoint(checkNotNull<ECPoint>(pub))
-    ) {
-    }
+        LazyECPoint(pub, compressed)
+    )
 
     protected constructor(priv: BigInteger?, pub: LazyECPoint) {
         if (priv != null) {
