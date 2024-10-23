@@ -10,8 +10,6 @@ android {
 
     defaultConfig {
         minSdk = 26
-        targetSdk = 33
-
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {
@@ -19,6 +17,10 @@ android {
                 cppFlags("")
             }
         }
+    }
+
+    lint {
+        targetSdk = 34
     }
 
     buildTypes {
@@ -37,11 +39,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
