@@ -43,21 +43,51 @@ fun storeInt32BE(value: Int, bytes: ByteArray, offSet: Int) {
     bytes[offSet] = (value ushr 24).toByte()
 }
 
-fun ByteArray.blake2b224(): ByteArray {
-    val digest = Blake2bDigest(224)
-    digest.update(this, 0, this.size)
-    val hash = ByteArray(28) // 224/8
-    digest.doFinal(hash, 0)
-    return hash
-}
+val ByteArray.blake2b512: ByteArray
+    get() {
+        val digest = Blake2bDigest(512)
+        digest.update(this, 0, this.size)
+        val hash = ByteArray(64)
+        digest.doFinal(hash, 0)
+        return hash
+    }
 
-fun ByteArray.blake2b256(): ByteArray {
+val ByteArray.blake2b256: ByteArray
+    get() {
+        val digest = Blake2bDigest(256)
+        digest.update(this, 0, this.size)
+        val hash = ByteArray(32)
+        digest.doFinal(hash, 0)
+        return hash
+    }
+
+fun blake2b256(vararg data: ByteArray): ByteArray {
     val digest = Blake2bDigest(256)
-    digest.update(this, 0, this.size)
+    data.forEach {
+        digest.update(it, 0, it.size)
+    }
     val hash = ByteArray(32)
     digest.doFinal(hash, 0)
     return hash
 }
+
+val ByteArray.blake2b224: ByteArray
+    get() {
+        val digest = Blake2bDigest(224)
+        digest.update(this, 0, this.size)
+        val hash = ByteArray(28)
+        digest.doFinal(hash, 0)
+        return hash
+    }
+
+val ByteArray.blake2b128: ByteArray
+    get() {
+        val digest = Blake2bDigest(128)
+        digest.update(this, 0, this.size)
+        val hash = ByteArray(16)
+        digest.doFinal(hash, 0)
+        return hash
+    }
 
 val ByteArray.keccak256: ByteArray
     get() {

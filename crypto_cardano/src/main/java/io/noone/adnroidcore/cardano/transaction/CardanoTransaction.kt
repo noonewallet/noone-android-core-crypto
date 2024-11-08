@@ -82,7 +82,7 @@ class CardanoTransaction(
             val stream = ByteArrayOutputStream()
             data.WriteTo(stream)
 
-            return stream.toByteArray().blake2b256()
+            return stream.toByteArray().blake2b256
         }
 
     val signatures: MutableList<Signature> = mutableListOf()

@@ -49,7 +49,7 @@ class CardanoAddress(
         ): CardanoAddress {
             return CardanoAddress(
                 (baseAddressKeyKey + cardanoMainNetTag).toByte(),
-                publicKey.blake2b224() + stakePublicKey.blake2b224(),
+                publicKey.blake2b224 + stakePublicKey.blake2b224,
                 AddressType.DELEGATE
             )
         }
@@ -59,7 +59,7 @@ class CardanoAddress(
         ): CardanoAddress {
             return CardanoAddress(
                 (rewardAccountKey + cardanoMainNetTag).toByte(),
-                stakePublicKey.blake2b224(),
+                stakePublicKey.blake2b224,
                 AddressType.STAKE
             )
         }
