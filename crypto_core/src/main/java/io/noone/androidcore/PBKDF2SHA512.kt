@@ -3,7 +3,6 @@ package io.noone.androidcore
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.charset.StandardCharsets
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.math.ceil
@@ -20,7 +19,7 @@ object PBKDF2SHA512 {
 
     fun derive(
         password: ByteArray,
-        salt: String,
+        salt: ByteArray,
         cycles: Int,
         keyLen: Int
     ): ByteArray {
@@ -44,7 +43,7 @@ object PBKDF2SHA512 {
     @Throws(Exception::class)
     private fun F(
         P: ByteArray,
-        S: String,
+        S: ByteArray,
         c: Int,
         i: Int
     ): ByteArray? {
@@ -55,11 +54,10 @@ object PBKDF2SHA512 {
         mac.init(key)
         for (j in 0 until c) {
             if (j == 0) {
-                val baS = S.toByteArray(StandardCharsets.UTF_8)
                 val baI = i.asByteArray()
-                val baU = ByteArray(baS.size + baI.size)
-                System.arraycopy(baS, 0, baU, 0, baS.size)
-                System.arraycopy(baI, 0, baU, baS.size, baI.size)
+                val baU = ByteArray(S.size + baI.size)
+                System.arraycopy(S, 0, baU, 0, S.size)
+                System.arraycopy(baI, 0, baU, S.size, baI.size)
                 uXor = mac.doFinal(baU)
                 uLast = uXor
                 mac.reset()
