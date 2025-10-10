@@ -7,16 +7,11 @@ plugins {
 android {
     namespace = "io.noone.androidcore.cardano"
     compileSdk = 34
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         minSdk = 26
         consumerProguardFiles("consumer-rules.pro")
-        externalNativeBuild {
-            cmake {
-                version = "3.10.2"
-                cppFlags("")
-            }
-        }
     }
 
     lint {
@@ -35,7 +30,7 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.10.2"
+            version = "4.1.1"
         }
     }
     compileOptions {
