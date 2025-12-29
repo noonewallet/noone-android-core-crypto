@@ -7,7 +7,6 @@ plugins {
 android {
     namespace = "io.noone.androidcore.cardano"
     compileSdk = 34
-    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         minSdk = 26
@@ -25,12 +24,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "4.1.1"
         }
     }
     compileOptions {

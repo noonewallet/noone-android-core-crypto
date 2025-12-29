@@ -17,10 +17,10 @@ class CardanoKey(
 ) {
 
     fun deriveChild(index: Int, hardened: Boolean): CardanoKey {
-        val exKey = Native.deriveCardanoKey(privateKey, chainCode, index, hardened)
+        val exKey = CardanoEd25519.deriveChildKey(privateKey, chainCode, index, hardened)
         return CardanoKey(
-            exKey.take(KEY_LENGTH).toByteArray(),
-            exKey.takeLast(CHAINCODE_LENGTH).toByteArray()
+            exKey.copyOfRange(0, KEY_LENGTH),
+            exKey.copyOfRange(KEY_LENGTH, KEY_LENGTH + CHAINCODE_LENGTH)
         )
     }
 
@@ -43,7 +43,7 @@ class CardanoKey(
 
     private var _publicKey: ByteArray? = null
         get() = if (field == null) {
-            Native.cardanoCryptoEd25519publickey(privateKey)
+            CardanoEd25519.publicKey(privateKey)
         } else {
             field
         }
